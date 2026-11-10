@@ -3,6 +3,6 @@
 **Track:** Track A (Intent Classification)
 
 ### Team Roles:
-* **Omwoyo Leo Kinara:** [e.g., Lead Data Contributor]
-* **Daniel Brian Kikuvi:** [e.g., Lead Reviewer & Documentation]
-* **Zakariya Mohamed:** [e.g., Code Runner & Demo Lead]
+* **Omwoyo Leo Kinara:** [Lead Data Contributor]
+* **Daniel Brian Kikuvi:** [ Lead Reviewer & Documentation]
+* **Zakariya Mohamed:** [Code Runner & Demo Lead]
