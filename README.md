@@ -1,34 +1,65 @@
-# Team 4 | SautiByte
-**Working Language:** Kiswahili
-**Track:** Track A (Intent Classification)
+# Team 04 | SautiByte - Kiswahili Intent Classification
 
-### Team Roles:
-* **Omwoyo Leo Kinara:** [Lead Data Contributor & Demo Lead]
-* **Daniel Brian Kikuvi:** [ Lead Documentation]
-* **Zakariya Mohamed:** [Code Runner & Lead Reviewer ]
+## Team and task
+- **Team number and name:** Team 04 (SautiByte)
+- **Three members and their contributions:** 
+  - Omwoyo Leo Kinara (T04-L): Authored 84 records, peer review, documentation.
+  - Daniel Brian Kikuvi (T04-B): Authored 83 records, peer review, quality report.
+  - Zakariya Mohamed (T04-Z): Authored 83 records, peer review, model training, recorded demo.
+- **Working language/variety:** Kiswahili (`sw-KE`, Kenyan variety with Sheng and code-switching)
+- **Track:** A intent
+- **Original team repository URL:** [https://github.com/lolkao55/SautiByte-NLP26]
+- **Full source commit SHA for the version submitted:** [511b8f1b371e560d376a2ce04596534ebb0f7620]
 
-###  Our Idea
-Our goal was to build a highly accurate Kiswahili intent classification model capable of mapping natural user commands to 10 distinct action labels (e.g., weather queries, setting alarms, managing lists, and playing music). We focused on real-world Kenyan Kiswahili, incorporating natural Sheng and code-mixing (e.g., "playlist", "news") to ensure the model reflects how people actually speak rather than relying on rigid, unnatural translations.
+## Idea and approach
+Our goal was to build an intent classification model for smart assistants that understands real-world Kenyan Kiswahili, mapping natural commands to 10 distinct action labels. Users would use this to seamlessly control apps (weather, alarms, lists, calendars, music) using the casual, code-mixed language they speak daily, rather than rigid standard translations.
+**Steps taken:**
+1. Authored 250 original Kiswahili sentences incorporating natural Sheng (e.g., "ngoma", "playlist").
+2. Conducted independent peer-reviews on all test records to ensure natural quality and correct intent mapping.
+3. Formatted data into exact 15/5/5 train/dev/test splits per label.
+4. Trained the baseline character TF-IDF and logistic regression model using the Datathon starter kit.
+5. Deployed the model locally using Streamlit to demonstrate real-time predictions.
 
-### Our Approach
-1. **Data Creation:** We manually authored a 100% original human dataset of 250 Kiswahili sentences (25 per label). 
-2. **Strict Review:** Every single test record underwent independent peer review to ensure natural language quality and label accuracy.
-3. **Splits:** We strictly adhered to the datathon ratio, splitting every 25-record group into 15 Train, 5 Dev, and 5 Test.
-4. **Modeling:** We trained the baseline character TF-IDF and logistic regression model on our curated dataset using the provided starter kit, and served it via a Streamlit UI.
+## Data and review
+- **Accepted contributions:** 250 `original_human` records (`source_dataset = team_authored`).
+- **Coverage:** 25 records exactly per label (weather_query, datetime_query, alarm_set, calendar_set, calendar_query, lists_createoradd, lists_query, play_music, news_query, qa_definition).
+- **Splits:** 150 Train / 50 Dev / 50 Test.
+- **Review method:** All 50 test records (and train/dev sets) were independently reviewed by a team member who did not author them (e.g., T04-L's records were reviewed by T04-B).
+- **Quality checks:** Validated structural requirements via `validate.py` (PASS: 250 records). Corrections to spelling and ambiguous intents were resolved and documented.
 
-### Results
-Our model achieved strong baseline performance on the frozen test set:
-* **Test Accuracy:** 0.860 (86.0%)
-* **Test Macro-F1:** 0.858
-* *Note: As detailed in our Quality Report, errors primarily stemmed from unseen vocabulary (e.g., "hali ya hewa") and overlapping trigger words (e.g., "Weka" used for both alarms and music).*
+## Code and how to run
+**Requirements:** Python 3.10+, Streamlit, and standard starter kit dependencies.
+**Commands:**
+1. Activate virtual environment: `.venv\Scripts\activate.bat` (or `.ps1` for PowerShell)
+2. Install dependencies: `python -m pip install -r requirements.txt`
+3. Validate: `python validate.py --track intent --data data/contribution.csv`
+4. Train: `python train.py --track intent --data data/contribution.csv`
+5. Evaluate: `python evaluate.py --track intent --data data/contribution.csv`
+6. Run UI: `python -m streamlit run app.py`
+*(Artefacts including `.joblib` model and JSON/CSV reports are generated and written to `artifacts/intent/`)*
 
-###  Team Contributions
-We divided the sprint equally to ensure a truly collaborative effort:
-* **Omwoyo Leo Kinara (T04-L):** Authored 84 Kiswahili records (weather, datetime, alarms, calendar), conducted independent peer reviews, and co-authored the dataset documentation.
-* **Daniel Brian Kikuvi (T04-B):** Authored 83 Kiswahili records (calendar, lists), conducted independent peer reviews, and co-authored the quality report and annotation guidelines.
-* **Zakariya Mohamed (T04-Z):** Authored 83 Kiswahili records (music, news, definitions), conducted independent peer reviews, executed the model training pipeline, and recorded the Streamlit UI demonstration
+## Results and limitations
+- **Final frozen test Accuracy:** 0.860 (86.0%)
+- **Final frozen test Macro-F1:** 0.858
+**Limitations:**
+1. **Unseen Vocabulary:** The model failed on words missing from training (e.g., missed "hali ya hewa", relying instead on time anchors like "wikendi").
+2. **Shared Trigger Words:** The model confused commands starting with "Weka" (used both for scheduling calendars and playing music).
+3. **Character fragment overlap:** Falsely predicted `lists_query` for the word "playlist" due to the shared "list" character fragment.
 
-## Watch Our Streamlit Demo App Here [https://drive.google.com/file/d/1VNOoZLsmsSufe2ilpT0O2Ab4tLuNjwco/view?usp=sharing]
+## Presentation and demo video
+- **Presentation/demo video URL (REQUIRED):** [[https://drive.google.com/file/d/1VNOoZLsmsSufe2ilpT0O2Ab4tLuNjwco/view?usp=sharing]]
 
-## Original team Repository [https://github.com/lolkao55/SautiByte-NLP26]
-## Final Commit SHA []
+## Required materials
+- **Contribution dataset and splits:** `data/contribution.csv`
+- **Annotation guide:** `documentation/ANNOTATION_GUIDE.md`
+- **Dataset card:** `documentation/DATA_PLAN.md`
+- **Quality/review report:** `documentation/quality_report.md`
+- **Evaluation outputs and baseline comparison:** `artifacts/intent/`
+- **Runnable code and dependency file:** `app.py`, `train.py`, `evaluate.py`, `requirements.txt`
+- **Trained artefacts or reproduction instructions:** `artifacts/intent/`
+- **Video link:** [https://drive.google.com/file/d/1VNOoZLsmsSufe2ilpT0O2Ab4tLuNjwco/view?usp=sharing]
+
+## Attribution and permissions
+All starter code, baseline models, and evaluation scripts were provided by the Strathmore NLP Hub Datathon starter kit v2.0. Our Kiswahili dataset (`sw-KE`) is 100% original human-authored data created specifically for this competition by Team 04. No upstream datasets or bulk AI translations were utilized.
+
+
