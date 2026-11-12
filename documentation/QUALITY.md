@@ -27,7 +27,8 @@
 | T04-B-082 | Nionyeshe listi kamili ya wageni watakaokuja. | Je, shati jeupe liko kwenye orodha yangu ya mavazi ninayofaa kununua? | Near-duplicate of T04-B-070; replaced with a new team-written sentence |
 
 * **Reviewed and kept (no change):** T04-B-013 (dinner with guests is a scheduled event → `calendar_set`), T04-B-057 ("dawa za mswaki" is genuine informal usage), T04-B-063 ("kwenye majina ya wageni mashuhuri" clearly implies a list).
-* **Other fixes:** Removed one extra `calendar_set` record (T04-L-081, so the label has exactly 25); corrected missing splits on two `qa_definition` records; moved one `news_query` record from train to test to reach 15/5/5; fixed trailing spaces and punctuation; made `source_record_id` match `record_id` for all T04-Z records; corrected one wrong `group_id` (T04-Z-059 changed from G-NEWS-26 to G-QDEF-25).
+* **Other fixes:** Removed one extra `calendar_set` record (T04-L-081, so the label has exactly 25); added missing splits on two `qa_definition` records; moved one `news_query` record from train to test to reach 15/5/5; renumbered T04-Z record IDs to three digits.
+* **Known metadata issues found after the final evaluation (not changed, to keep the evaluated file identical to the results):** `source_record_id` for T04-Z records still uses the old two-digit IDs (e.g. T04-Z-02 for T04-Z-002); T04-Z-059 (`qa_definition`) has `group_id` G-NEWS-26 instead of a G-QDEF ID; a few texts have missing spaces after commas or a space before a full stop (e.g. T04-L-021, T04-L-050, T04-Z-057). None of these change any text label or split, and every `group_id` is still unique.
 
 ## Disagreements and resolutions
 
@@ -59,21 +60,49 @@
 
 * Each record has its own `group_id` (e.g. `G-CSET-01`, `G-PMUS-12`), because no records are paraphrases of each other.
 * Every label has exactly 15 train / 5 dev / 5 test (150 / 50 / 50 total).
-* `validate.py`: [paste result after running it].
+* `validate.py`: PASS: 250 records; language quality, permission and semantic duplicate review remain human responsibilities.
 
 ## Results
 
-* **Majority baseline (test):** accuracy [ ], macro-F1 [ ].
-* **Dev (character TF-IDF + logistic regression):** accuracy [ ], macro-F1 [ ].
-* **Final frozen test:** accuracy [ ], macro-F1 [ ]. Test size: 50 (5 per label).
+Model: the starter kit's default classifier (character TF-IDF + logistic regression), unchanged. No settings were tuned; choices were frozen after one dev run, and the test set was evaluated once.
 
-## Error analysis (up to five actual mistakes from `test_predictions.csv`)
+| Split | Examples | Accuracy | Macro-F1 |
+|---|---|---|---|
+| Majority baseline (dev) | 50 | 0.100 | 0.018 |
+| Dev | 50 | 0.840 | 0.841 |
+| Majority baseline (test) | 50 | n/a | 0.018 |
+| **Final frozen test** | **50** | **0.860** | **0.858** |
 
-1. [record_id] "[text]": true `[label]`, predicted `[label]`. Why: [ ]
-2. …
+Per-label test F1 (5 test examples per label): weather_query 0.800 · datetime_query 0.800 · alarm_set 0.909 · calendar_set 0.727 · calendar_query 1.000 · lists_createoradd 0.909 · lists_query 0.800 · play_music 0.750 · news_query 0.889 · qa_definition 1.000.
+
+With only 5 test examples per label, one mistake moves a label's F1 by about 0.1–0.2, so per-label differences are uncertain.
+
+## Error analysis
+
+The model made 7 mistakes on the 50 test examples. Five are analysed below.
+
+1. **T04-Z-032** "Fungulia playlist yangu ya gym.": true `play_music`, predicted `lists_query`.
+   The model reads character fragments, and "play**list** yangu ya …" contains the same pieces as "**list**i yangu ya …" and "orodha yangu ya …", which appear in the list labels. The word "playlist" never appears in the training set, so the model had nothing teaching it that a playlist means music.
+
+2. **T04-Z-031** "Weka remix niskize nikisafiri nyumbani.": true `play_music`, predicted `calendar_set`.
+   Nine training sentences start with "Weka", and most are `calendar_set` (4) or `alarm_set` (3). The opening verb outweighed "remix" and "niskize". This is the "shared word" problem the handbook warns about: "Weka" means *put on* for music but *schedule* for the calendar.
+
+3. **T04-L-024** "Hali ya hewa inakaa vipi hii wikendi?": true `weather_query`, predicted `datetime_query`.
+   "Hali ya hewa" (weather), the most standard weather phrase, does not appear in any training sentence: our weather examples used mvua, jua, upepo and joto instead. With no anchor, the model leaned on the time word "wikendi". This is a coverage gap in our data.
+
+4. **T04-L-050** "Je,hukumu litatolewa miezi miwili zijazo?": true `datetime_query`, predicted `weather_query`.
+   This is one of the records in Disagreement 1: it asks when a court verdict will come, not the current time or date. It contains no clock words, and "…zijazo" ("coming…") resembles forecast questions, so the model chose weather. This supports View B: records about events give the model no consistent signal for `datetime_query`.
+
+5. **T04-B-081** "Kuna maziwa kwenye orodha yangu ya duka?": true `lists_query`, predicted `lists_createoradd`.
+   The sentence shares "maziwa kwenye … orodha/listi …" with the training sentence "Weka maziwa kwenye listi ya soko." (`lists_createoradd`). A character model notices the shared item and phrase but not that one is a question ("Kuna…?") and the other a command ("Weka…").
+
+**The other two mistakes:** T04-B-014 "Weka shughuli ya kufanya mazoezi kila asubuhi." (`calendar_set` → `alarm_set`: a daily morning routine with "Weka" sounds like an alarm; this record was flagged as borderline in review) and T04-Z-058 "Nini kinaendelea kuhusu Ebola?" (`news_query` → `calendar_set`: the only news test sentence with no "habari" or "news" word).
+
+**Correct predictions that still need caution:** T04-L-072 "Saa tano asubuhi ndiyo saa nitakayo enda kukimbia" and T04-L-073 "Nitalala mpaka saa kumi jioni" were predicted `alarm_set`, matching their labels, but they are statements rather than requests (Disagreement 2). Several event-time questions such as "Gesi iliisha saa ngapi?" were also predicted `datetime_query` because the model learned the words "saa ngapi". These match our labels, but they show the model matching words, not intent.
 
 ## Language variety, limits and unresolved issues
 
 * Kenyan Kiswahili with natural Sheng (e.g. "ngoma", "chai za mastaa", "nirushie moja") and code-switching (e.g. "news", "playlist", "ku-test speaker"). This reflects real use but may not represent standard (sanifu) or Tanzanian Kiswahili.
 * Small dataset written by three authors, so vocabulary and style may be narrow; 5 test records per label make per-label scores very uncertain.
-* The `datetime_query` and `alarm_set` disagreements above were kept by team decision and remain a known limitation.
+* The `datetime_query` and `alarm_set` disagreements above were kept by team decision and remain a known limitation; the error analysis shows their effect (errors 4 and the 'correct predictions that need caution').
+* Coverage gaps found in testing: no training sentence uses "hali ya hewa" or "playlist", and "Weka" is shared by several labels.
